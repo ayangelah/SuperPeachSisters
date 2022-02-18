@@ -10,8 +10,6 @@ GameWorld* createStudentWorld(string assetPath)
 	return new StudentWorld(assetPath);
 }
 
-// Students:  Add code to this file, StudentWorld.h, Actor.h, and Actor.cpp
-
 StudentWorld::~StudentWorld()
 {
     cleanUp();
@@ -44,6 +42,8 @@ int StudentWorld::move()
     if (m_peach->isAlive()) {
         m_peach->doSomething();
     }
+    
+    //othercast stuff
     for (int i = 0; i < m_otherCast.size(); i++) {
         m_otherCast[i]->doSomething();
     }
@@ -56,7 +56,7 @@ int StudentWorld::move()
         playSound(SOUND_GAME_OVER);
         return GWSTATUS_PLAYER_WON;
     }
-    if (false /*peach competed current level*/) {
+    if (false /*peach completed current level*/) {
         playSound(SOUND_FINISHED_LEVEL);
         return GWSTATUS_FINISHED_LEVEL;
     }
@@ -81,6 +81,12 @@ void StudentWorld::cleanUp()
     for (int i = 0; i < m_otherCast.size(); i++) {
         delete m_otherCast[i];
     }
+}
+
+bool StudentWorld::overlap(Actor* a, Actor* b) {
+    if (abs(a->getX()-b->getX()) < SPRITE_WIDTH)
+        return true;
+    return false;
 }
 
 void StudentWorld::levelBuild() {
@@ -108,13 +114,16 @@ void StudentWorld::levelBuild() {
                     case Level::peach:
                         //construct peach w/ position
                         m_peach = new Peach(this, x, y);
+                        assert(m_peach);
                         break;
                     case Level::koopa:
                         //construct koopa
                         break;
-                    case Level::goomba:
-                        //construct goomba
+                    case Level::goomba: {
+                        Goomba* newGoomba = new Goomba(this, x, y);
+                        m_otherCast.push_back(newGoomba);
                         break;
+                        }
                     case Level::piranha:
                         //construct piranha
                         break;
@@ -122,7 +131,7 @@ void StudentWorld::levelBuild() {
                         Block* newBlock = new Block(this, x, y);
                         m_otherCast.push_back(newBlock);
                         break;
-                    }
+                        }
                     case Level::star_goodie_block:
                         //construct star block
                         break;

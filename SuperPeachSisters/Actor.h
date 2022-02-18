@@ -16,7 +16,7 @@ public:
     }
     StudentWorld* getWorld();
     bool isAlive() {
-        return true;
+        return notDead;
     }
 private:
     StudentWorld* m_world;
@@ -29,7 +29,6 @@ public:
     virtual ~Peach();
     virtual void doSomething();
 private:
-//    StudentWorld* m_world;
 };
 
 class Block: public Actor {
@@ -39,12 +38,19 @@ public:
     virtual void doSomething();
     void bonk();
 private:
-    StudentWorld* m_world;
 };
 
 class Pipe: public Block {
     
 };
 
+class Goomba: public Actor {
+public:
+    Goomba(StudentWorld* sw, int x, int y);
+    virtual ~Goomba();
+    virtual void doSomething();
+    void bonk();
+private:
+};
 
 #endif // ACTOR_H_

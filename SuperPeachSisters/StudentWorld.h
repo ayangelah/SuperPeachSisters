@@ -18,6 +18,15 @@ public:
     StudentWorld(std::string assetPath);
     ~StudentWorld();
     void levelBuild();
+    bool overlap(Actor* a, Actor* b);
+    inline
+    Peach* returnPeach() {
+        return m_peach;
+    }
+    inline
+    vector<Actor*> returnCast() {
+        return m_otherCast;
+    }
     virtual int init(); //initializes levels
     virtual int move(); //plays a tick
     virtual void cleanUp(); //cleans up all objects at the end of levels.
