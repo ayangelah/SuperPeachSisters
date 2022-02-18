@@ -79,8 +79,6 @@
 		4B91F8A72033F260003AFA78 /* SuperPeachSisters */ = {
 			isa = PBXGroup;
 			children = (
-				4B91F8B62033F3F7003AFA78 /* Actor.cpp */,
-				4B91F8B02033F3F7003AFA78 /* Actor.h */,
 				4B91F8B52033F3F7003AFA78 /* GameConstants.h */,
 				4B91F8B82033F3F7003AFA78 /* GameController.cpp */,
 				4B91F8BA2033F3F7003AFA78 /* GameController.h */,
@@ -91,6 +89,8 @@
 				4B91F8B42033F3F7003AFA78 /* main.cpp */,
 				4B91F8BD2033F3F8003AFA78 /* SoundFX.h */,
 				4B91F8BC2033F3F7003AFA78 /* SpriteManager.h */,
+				4B91F8B62033F3F7003AFA78 /* Actor.cpp */,
+				4B91F8B02033F3F7003AFA78 /* Actor.h */,
 				4B91F8B22033F3F7003AFA78 /* StudentWorld.cpp */,
 				4B91F8BE2033F3F8003AFA78 /* StudentWorld.h */,
 			);
@@ -290,10 +290,6 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = YES;
-/* DAS: Let's see if these can be replaced by /usr/X11 versions
-				"HEADER_SEARCH_PATHS[arch=*]" = /usr/local/Cellar/freeglut/3.2.2/include/GL;
-				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/Cellar/freeglut/3.2.2/lib;
-*/
 				"HEADER_SEARCH_PATHS[arch=*]" = /usr/X11/include/GL;
 				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/X11/lib;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
@@ -309,10 +305,6 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = YES;
-/* DAS: Let's see if these can be replaced by /usr/X11 versions
-				"HEADER_SEARCH_PATHS[arch=*]" = /usr/local/Cellar/freeglut/3.2.2/include/GL;
-				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/Cellar/freeglut/3.2.2/lib;
-*/
 				"HEADER_SEARCH_PATHS[arch=*]" = /usr/X11/include/GL;
 				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/X11/lib;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
