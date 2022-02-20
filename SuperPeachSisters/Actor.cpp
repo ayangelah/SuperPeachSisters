@@ -20,11 +20,14 @@ StudentWorld* Actor::getWorld() {
 //PEACH
 Peach::Peach(StudentWorld* sw, int x, int y)
 : Actor(IID_PEACH, 0, sw, x, y) {
-    
+    hitPoint = 1;
+    isInvincible = false;
+    hasJumpPower = false;
+    hasStarPower = false;
+    hasShootPower = false;
 }
 
 Peach::~Peach() {
-    cout << "deleted peach" << endl;
 }
 
 void Peach::doSomething() {
@@ -34,61 +37,179 @@ void Peach::doSomething() {
     //check if invincible
     //check if recharging
     //check if overlapping with another game object
+    Actor* a = touching();
+    if (a != nullptr) {
+        a->bonk();
+//        int identifier = a->actorType();
+//        switch (identifier) {
+//            case IS_PEACH: {
+//
+//            }
+//            case IS_ENEMY: {
+//
+//            }
+//            case IS_BLOCK_OR_PIPE: {
+//
+//            }
+//            case IS_SPECIAL_BLOCK: {
+//
+//            }
+//            case IS_MARIO_OR_FLAG: {
+//
+//            }
+//
+//        }
+    }
+    
     int ch;
     if (getWorld()->getKey(ch)) {
     // user hit a key during this tick!
         switch (ch)
         {
             case KEY_PRESS_LEFT:
-                cout << "moves left" << endl;
                 setDirection(180);
-                moveTo(this->getX()-SPRITE_WIDTH/2, this->getY());
+                if (!(getWorld()->isBlockingObjectAt(this->getX()/4-1, this->getY()/4))) {
+                    moveTo(this->getX()-SPRITE_WIDTH/2, this->getY());
+                }
                 break;
             case KEY_PRESS_RIGHT:
                 setDirection(0);
-                cout << "moves right" << endl;
-                moveTo(getX()+SPRITE_WIDTH/2, getY());
+                if (!(getWorld()->isBlockingObjectAt(this->getX()/4+1, this->getY()/4))) {
+                    moveTo(this->getX()+SPRITE_WIDTH/2, this->getY());
+                }
+                cout << "blocked going right!" << endl;
                 break;
             case KEY_PRESS_SPACE:
-                cout << "fireball!" << endl;
-                
+                if (hasShootPower) {
+                    //fireball
+                }
+                break;
+            case KEY_PRESS_DOWN:
+                setDirection(180);
+                if (!(getWorld()->isBlockingObjectAt(getX(), getY()-SPRITE_HEIGHT/2 + 1))) {
+                    moveTo(this->getX(), this->getY()-SPRITE_HEIGHT/2);
+                }
                 break;
             case KEY_PRESS_UP:
-                cout << "jump!" << endl;
+                if (getWorld()->isBlockingObjectAt(this->getX()/SPRITE_WIDTH, this->getY()/SPRITE_HEIGHT-1)) {
+                    moveTo(this->getX(), this->getY()+SPRITE_HEIGHT/2);
+                }
                 break;
             default:
-                cout << "char not recognized" << endl;
                 break;
         }
     return;
     }
 }
 
-//BLOCK
-Block::Block(StudentWorld* sw, int x, int y)
-: Actor(IID_BLOCK, 2, sw, x, y) {
-}
-Block::~Block() {
-    cout << "deleted block" << endl;
+int Peach::actorType() {
+    return IS_PEACH;
 }
 
-void Block::doSomething() {
-    //cout << "block does something" << endl;
+Actor* Peach::touching() {
+    for (int i = 0; i < getWorld()->returnCast().size(); i++) {
+        if (getWorld()->overlap(this, getWorld()->returnCast()[i])) {
+            return getWorld()->returnCast()[i];
+        }
+    }
+    return nullptr;
+}
+
+//BLOCK
+Block::Block(int imageID, StudentWorld* sw, int x, int y)
+: Actor(imageID, 2, sw, x, y) {
+    bool hasGoodie = true;
+}
+Block::~Block() {
+}
+
+void Block::doSomething() { }
+
+int Block::actorType() {
+    return IS_BLOCK_OR_PIPE;
+}
+
+void Block::bonk() {
+}
+
+//PIPE
+Pipe::Pipe(StudentWorld* sw, int x, int y): Block(IID_PIPE, sw, x, y) {
+    
+}
+
+Pipe::~Pipe() {
+    
+}
+
+void Pipe::bonk() {
+}
+
+int Pipe::actorType() {
+    return IS_BLOCK_OR_PIPE;
+}
+
+//ENEMY
+Enemy::Enemy(int imageID, StudentWorld* sw, int x, int y) : Actor(imageID, 1, sw, x, y) {
+    
+}
+
+Enemy::~Enemy() {
+    
+}
+
+void Enemy::doSomething() {
+    if (getWorld()->overlap(this, getWorld()->returnPeach())) {
+        //attempt to attack
+    }
+}
+
+int Enemy::actorType() {
+    return IS_ENEMY;
+}
+
+void Enemy::bonk() {
 }
 
 //GOOMBA
 Goomba::Goomba(StudentWorld* sw, int x, int y)
-: Actor(IID_GOOMBA, 1, sw, x, y) {
+: Enemy(IID_GOOMBA, sw, x, y) {
     
 }
 Goomba::~Goomba() {
-    cout << "deleted goomba" << endl;
 }
 
 void Goomba::doSomething() {
     if (getWorld()->overlap(this, getWorld()->returnPeach())) {
         //attempt to attack
-        cout << "attack peach" << endl;
     }
-    //cout << "goomba does something" << endl;
+}
+
+void Goomba::bonk() {
+}
+
+//PIRANHA
+Piranha::Piranha(StudentWorld* sw, int x, int y) : Enemy(IID_PIRANHA, sw, x, y){
+    
+}
+Piranha::~Piranha() {
+    
+}
+void Piranha::doSomething() {
+    
+}
+
+void Piranha::bonk() {
+}
+
+//KOOPA
+Koopa::Koopa(StudentWorld* sw, int x, int y) : Enemy(IID_KOOPA, sw, x, y){
+    
+}
+Koopa::~Koopa() {
+    
+}
+void Koopa::doSomething() {
+    
+}
+void Koopa::bonk() {
 }

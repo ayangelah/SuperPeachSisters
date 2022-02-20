@@ -19,6 +19,7 @@ public:
     ~StudentWorld();
     void levelBuild();
     bool overlap(Actor* a, Actor* b);
+    bool isBlockingObjectAt(int x, int y);
     inline
     Peach* returnPeach() {
         return m_peach;
@@ -34,6 +35,9 @@ public:
 private:
     vector<Actor*> m_otherCast; //blocks,pipes,flags,mario,enemies
     Peach* m_peach;
+    int marioIndex;
+    int flagIndex;
+    bool blockingObject[4*GRID_WIDTH][4*GRID_HEIGHT];
 };
 
 #endif // STUDENTWORLD_H_

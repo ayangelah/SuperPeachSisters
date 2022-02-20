@@ -18,6 +18,13 @@ StudentWorld::~StudentWorld()
 StudentWorld::StudentWorld(string assetPath)
 : GameWorld(assetPath)
 {
+    for (int i = 0; i < GRID_WIDTH; i++) {
+        for (int j = 0; j < GRID_HEIGHT; j++) {
+            blockingObject[i][j] = false;
+        }
+    }
+    marioIndex = -1;
+    flagIndex = -1;
 }
 
 int StudentWorld::init()
@@ -52,11 +59,14 @@ int StudentWorld::move()
         //destroy peach
         return GWSTATUS_PLAYER_DIED;
     }
-    if (false/*peach reach mario*/) {
+    
+    //if found mario
+    if (marioIndex != -1 && overlap(m_peach, m_otherCast[marioIndex])) {
         playSound(SOUND_GAME_OVER);
         return GWSTATUS_PLAYER_WON;
     }
-    if (false /*peach completed current level*/) {
+    //if completed level
+    if (flagIndex != -1 && overlap(m_peach, m_otherCast[flagIndex])) {
         playSound(SOUND_FINISHED_LEVEL);
         return GWSTATUS_FINISHED_LEVEL;
     }
@@ -84,9 +94,13 @@ void StudentWorld::cleanUp()
 }
 
 bool StudentWorld::overlap(Actor* a, Actor* b) {
-    if (abs(a->getX()-b->getX()) < SPRITE_WIDTH)
+    if (abs(a->getX()-b->getX()) < SPRITE_WIDTH && abs(a->getY()-b->getY()) < SPRITE_HEIGHT)
         return true;
     return false;
+}
+
+bool StudentWorld::isBlockingObjectAt(int x, int y) {
+    return blockingObject[x][y];
 }
 
 void StudentWorld::levelBuild() {
@@ -116,20 +130,29 @@ void StudentWorld::levelBuild() {
                         m_peach = new Peach(this, x, y);
                         assert(m_peach);
                         break;
-                    case Level::koopa:
-                        //construct koopa
+                    case Level::koopa:{
+//                        Koopa* newKoopa = new Koopa(this, x, y);
+//                        m_otherCast.push_back(newKoopa);
+                    }
                         break;
                     case Level::goomba: {
-                        Goomba* newGoomba = new Goomba(this, x, y);
-                        m_otherCast.push_back(newGoomba);
+//                        Goomba* newGoomba = new Goomba(this, x, y);
+//                        m_otherCast.push_back(newGoomba);
                         break;
                         }
-                    case Level::piranha:
-                        //construct piranha
+                    case Level::piranha: {
+//                        Piranha* newPiranha = new Piranha(this, x, y);
+//                        m_otherCast.push_back(newPiranha);
+                        }
                         break;
                     case Level::block: {
-                        Block* newBlock = new Block(this, x, y);
+                        Block* newBlock = new Block(IID_BLOCK, this, x, y);
                         m_otherCast.push_back(newBlock);
+                        for (int a = 0; a < 4; a++) {
+                            for (int b = 0; b < 4; b++) {
+                                blockingObject[i+b][j+b] = true;
+                            }
+                        }
                         break;
                         }
                     case Level::star_goodie_block:
@@ -141,14 +164,24 @@ void StudentWorld::levelBuild() {
                     case Level::flower_goodie_block:
                         //construct flower block
                         break;
-                    case Level::pipe:
-                        //construct pipe
+                    case Level::pipe:{
+//                        Pipe* newPipe = new Pipe(this, x, y);
+//                        m_otherCast.push_back(newPipe);
+//                        blockingObject[i][j] = true;
+//                        break;
+                        }
                         break;
-                    case Level::flag:
-                        //construct flag
+                    case Level::flag: {
+//                        Flag* newFlag = new Flag(this, x, y);
+//                        m_otherCast.push_back(newFlag);
+//                        flagIndex = m_otherCast.size()-1;
+                         }
                         break;
-                    case Level::mario:
-                        //construct mario
+                    case Level::mario: {
+//                        Mario* newMario = new Mario(this, x, y);
+//                        m_otherCast.push_back(newMario);
+//                        marioIndex = m_otherCast.size()-1;
+                        }
                         break;
                 }
             }
