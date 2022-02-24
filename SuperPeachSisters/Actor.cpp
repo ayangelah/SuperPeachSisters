@@ -68,16 +68,21 @@ void Peach::doSomething() {
         {
             case KEY_PRESS_LEFT:
                 setDirection(180);
-                if (!(getWorld()->isBlockingObjectAt(this->getX()/4-1, this->getY()/4))) {
+                if (getWorld()->isBlockingObjectAt(this->getX()/4-1, this->getY()/4)) {
+                    break;
+                }
+                if (!(getWorld()->isBlockingObjectAt(this->getX()/4, this->getY()/4))) {
                     moveTo(this->getX()-SPRITE_WIDTH/2, this->getY());
                 }
                 break;
             case KEY_PRESS_RIGHT:
                 setDirection(0);
-                if (!(getWorld()->isBlockingObjectAt(this->getX()/4+1, this->getY()/4))) {
+                if (getWorld()->isBlockingObjectAt(this->getX()/4+2, this->getY()/4)) {
+                    break;
+                }
+                if (!(getWorld()->isBlockingObjectAt(this->getX()/4, this->getY()/4))) {
                     moveTo(this->getX()+SPRITE_WIDTH/2, this->getY());
                 }
-                cout << "blocked going right!" << endl;
                 break;
             case KEY_PRESS_SPACE:
                 if (hasShootPower) {

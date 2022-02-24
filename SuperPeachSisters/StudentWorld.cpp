@@ -35,6 +35,14 @@ int StudentWorld::init()
     //allocate and insert a peach object
     //allocate and insert all blocks, pipes, flags, enemies, and mario
     //load data from level data file
+
+//    for (int j=GRID_HEIGHT*2-1; j>=0; j--) {
+//        for (int i=0; i<GRID_WIDTH*2; i++) {
+//                cout << (this->blockingObject[i][j] ? "#" : " ");
+//        }
+//        cout << endl;
+//
+//    }
     return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -148,9 +156,9 @@ void StudentWorld::levelBuild() {
                     case Level::block: {
                         Block* newBlock = new Block(IID_BLOCK, this, x, y);
                         m_otherCast.push_back(newBlock);
-                        for (int a = 0; a < 4; a++) {
-                            for (int b = 0; b < 4; b++) {
-                                blockingObject[i+b][j+b] = true;
+                        for (int a = 0; a < 2; a++) {
+                            for (int b = 0; b < 2; b++) {
+                                blockingObject[2*i+a][2*j+b] = true;
                             }
                         }
                         break;

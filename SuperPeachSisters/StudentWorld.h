@@ -37,7 +37,7 @@ private:
     Peach* m_peach;
     int marioIndex;
     int flagIndex;
-    bool blockingObject[4*GRID_WIDTH][4*GRID_HEIGHT];
+    bool blockingObject[2*GRID_WIDTH][2*GRID_HEIGHT];
 };
 
 #endif // STUDENTWORLD_H_
