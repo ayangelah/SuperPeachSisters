@@ -19,7 +19,7 @@ public:
     ~StudentWorld();
     void levelBuild();
     bool overlap(Actor* a, Actor* b);
-    bool isBlockingObjectAt(int x, int y);
+    Actor* isBlockingObjectAt(int x, int y);
     inline
     Peach* returnPeach() {
         return m_peach;
@@ -27,6 +27,18 @@ public:
     inline
     vector<Actor*> returnCast() {
         return m_otherCast;
+    }
+    inline
+    void changeScore(int increase) {
+        playerScore += increase;
+    }
+    inline
+    void levelCompletedSet() {
+        levelCompleted = true;
+    }
+    inline
+    void playerWonSet() {
+        playerWon = true;
     }
     virtual int init(); //initializes levels
     virtual int move(); //plays a tick
@@ -37,7 +49,10 @@ private:
     Peach* m_peach;
     int marioIndex;
     int flagIndex;
-    bool blockingObject[2*GRID_WIDTH][2*GRID_HEIGHT];
+    int playerScore;
+    bool levelCompleted;
+    bool playerWon;
+    Actor* blockingObject[VIEW_WIDTH][VIEW_HEIGHT];
 };
 
 #endif // STUDENTWORLD_H_

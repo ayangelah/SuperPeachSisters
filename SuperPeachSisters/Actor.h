@@ -15,7 +15,7 @@ class StudentWorld;
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
 class Actor: public GraphObject {
 public:
-    Actor(int imageID, int graphicalDepth, StudentWorld* sw, int x, int y);
+    Actor(int imageID, int dir, int graphicalDepth, StudentWorld* sw, int x, int y);
     virtual ~Actor() = 0;
     virtual void doSomething() = 0;
     virtual void bonk() = 0;
@@ -40,6 +40,7 @@ public:
     Actor* touching();
     virtual int actorType();
     virtual void bonk() { }
+    void jump(int tick);
     bool starPower() {
         return hasStarPower;
     }
@@ -53,11 +54,14 @@ public:
         return isInvincible;
     }
 private:
+    bool isJumping;
+    int remainingJumpDistance;
     int hitPoint;
     bool hasStarPower;
     bool hasJumpPower;
     bool hasShootPower;
     bool isInvincible;
+    int rechargeTime;
 };
 
 class Block: public Actor {
@@ -82,7 +86,7 @@ public:
 
 class Flag: public Actor {
 public:
-    Flag(int imageID, StudentWorld* sw, int x, int y);
+    Flag(StudentWorld* sw, int x, int y);
     virtual ~Flag();
     virtual void doSomething();
     int actorType();
@@ -91,7 +95,7 @@ public:
 
 class Mario: public Actor {
 public:
-    Mario(int imageID, StudentWorld* sw, int x, int y);
+    Mario(StudentWorld* sw, int x, int y);
     virtual ~Mario();
     virtual void doSomething();
     int actorType();
@@ -100,7 +104,7 @@ public:
 
 class Flower: public Actor {
 public:
-    Flower(int imageID, StudentWorld* sw, int x, int y);
+    Flower(StudentWorld* sw, int x, int y);
     virtual ~Flower();
     virtual void doSomething();
     int actorType();
@@ -109,7 +113,7 @@ public:
 
 class Star: public Actor {
 public:
-    Star(int imageID, StudentWorld* sw, int x, int y);
+    Star(StudentWorld* sw, int x, int y);
     virtual ~Star();
     virtual void doSomething();
     int actorType();
@@ -118,7 +122,7 @@ public:
 
 class Piranha_Fireball: public Actor {
 public:
-    Piranha_Fireball(int imageID, StudentWorld* sw, int x, int y);
+    Piranha_Fireball(StudentWorld* sw, int x, int y);
     virtual ~Piranha_Fireball();
     virtual void doSomething();
     int actorType();
@@ -127,7 +131,7 @@ public:
 
 class Peach_Fireball: public Actor {
 public:
-    Peach_Fireball(int imageID, StudentWorld* sw, int x, int y);
+    Peach_Fireball(StudentWorld* sw, int x, int y);
     virtual ~Peach_Fireball();
     virtual void doSomething();
     int actorType();
@@ -138,7 +142,7 @@ class Enemy: public Actor {
 public:
     Enemy(int imageID, StudentWorld* sw, int x, int y);
     virtual ~Enemy();
-    virtual void doSomething();
+    void doSomething();
     int actorType();
     void bonk();
 };
@@ -147,7 +151,6 @@ class Shell: public Enemy {
 public:
     Shell(StudentWorld* sw, int x, int y);
     virtual ~Shell();
-    virtual void doSomething();
     void bonk();
 private:
 };
@@ -156,7 +159,6 @@ class Goomba: public Enemy {
 public:
     Goomba(StudentWorld* sw, int x, int y);
     virtual ~Goomba();
-    virtual void doSomething();
     void bonk();
 private:
 };
@@ -165,7 +167,6 @@ class Piranha: public Enemy {
 public:
     Piranha(StudentWorld* sw, int x, int y);
     virtual ~Piranha();
-    virtual void doSomething();
     void bonk();
 private:
 };
@@ -174,7 +175,6 @@ class Koopa: public Enemy {
 public:
     Koopa(StudentWorld* sw, int x, int y);
     virtual ~Koopa();
-    virtual void doSomething();
     void bonk();
 private:
 };
