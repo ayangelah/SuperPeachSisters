@@ -289,7 +289,6 @@ class Koopa: public Enemy {
 public:
     Koopa(StudentWorld* sw, int x, int y);
     virtual ~Koopa();
-//    void doSomething();
     bool damaged();
     
 private:

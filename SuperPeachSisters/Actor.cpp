@@ -499,6 +499,12 @@ void Piranha::doSomething() {
         getWorld()->returnPeach()->bonk();
         return;
     }
+    if (getWorld()->overlap(this, getWorld()->returnPeach()) && getWorld()->returnPeach()->starPower()) {
+        getWorld()->playSound(SOUND_PLAYER_KICK);
+        changeAliveStatus(false);
+        getWorld()->changeScore(100);
+        return;
+    }
     if (!(abs(getY()-getWorld()->returnPeach()->getY()) <= 1.5*SPRITE_HEIGHT))
         return;
     if (getWorld()->returnPeach()->getX() < getX()) //left
