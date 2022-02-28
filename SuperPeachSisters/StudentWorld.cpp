@@ -3,6 +3,9 @@
 #include <string>
 #include "Level.h"
 #include "Actor.h"
+#include <iostream>
+#include <sstream>
+#include <iomanip>
 using namespace std;
 
 GameWorld* createStudentWorld(string assetPath)
@@ -27,17 +30,14 @@ StudentWorld::StudentWorld(string assetPath)
     flagIndex = -1;
     levelCompleted = false;
     playerWon = false;
+    //GameWorld::setMsPerTick(15000);
 }
 
 int StudentWorld::init()
 {
+    
     levelBuild();
-    //m_peach = new Peach(this, VIEW_WIDTH/2,  VIEW_HEIGHT/2);
-    //initialize data structures in game
-    //allocate and insert a peach object
-    //allocate and insert all blocks, pipes, flags, enemies, and mario
-    //load data from level data file
-
+    
     for (int j=GRID_HEIGHT*2-1; j>=0; j--) {
         for (int i=0; i<GRID_WIDTH*2; i++) {
                 cout << (this->blockingObject[i][j] != nullptr ? "#" : " ");
@@ -45,7 +45,18 @@ int StudentWorld::init()
         cout << endl;
 
     }
+    //GameWorld::setMsPerTick(15000);
     return GWSTATUS_CONTINUE_GAME;
+}
+
+int delay(int t)
+{
+    volatile int s=0;
+    for (int i=0; i<t; i++)
+        for (int j=0; j<t; j++)
+            s=s*i+j % 65535;
+    
+    return s;
 }
 
 int StudentWorld::move()
@@ -54,11 +65,28 @@ int StudentWorld::move()
     // Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
     //--------------------------------------------------
     //Gamestuff
+    volatile int sum = delay(10000);
     if (levelCompleted)
         return GWSTATUS_FINISHED_LEVEL;
     
     if (playerWon)
         return GWSTATUS_PLAYER_WON;
+    
+    ostringstream oss;
+    oss << "Lives: " << getLives() << "  ";
+    oss.fill('0');
+    oss << "Level: " << setw(2) << getLevel() << "  ";
+    oss << "Points: " << setw(6) << playerScore;
+    if (m_peach->starPower())
+        oss << " StarPower!";
+    if (m_peach->shootPower())
+        oss << " ShootPower!";
+    if (m_peach->jumpPower())
+        oss << " JumpPower!";
+    string s = oss.str();
+//    string output = "Lives: " + '3' + "  Level: " + '1' + "  Points: " + playerScore;
+    setGameStatText(s);
+    
     //Peachstuff
     if (m_peach->isAlive()) {
         m_peach->doSomething();
@@ -66,7 +94,8 @@ int StudentWorld::move()
     
     //othercast stuff
     for (int i = 0; i < m_otherCast.size(); i++) {
-        m_otherCast[i]->doSomething();
+        if (m_otherCast[i] != nullptr)
+            m_otherCast[i]->doSomething();
     }
     if (!m_peach->isAlive()) {
         playSound(SOUND_PLAYER_DIE);
@@ -89,9 +118,9 @@ int StudentWorld::move()
     for (int i = 0; i < m_otherCast.size(); i++) {
         if (!m_otherCast[i]->isAlive()) {
             delete m_otherCast[i];
+            m_otherCast[i] = nullptr;
         }
     }
-//    remove dead game objects
 //    // Update the game status line
 //    update display text // update the score/lives/level text at screen top
     // the player hasn’t completed the current level and hasn’t died, so
@@ -104,17 +133,20 @@ void StudentWorld::cleanUp()
     delete m_peach;
     for (int i = 0; i < m_otherCast.size(); i++) {
         delete m_otherCast[i];
+        m_otherCast[i] = nullptr;
     }
 }
 
 bool StudentWorld::overlap(Actor* a, Actor* b) {
+    if (a == nullptr || b == nullptr)
+        return false;
     if (abs(a->getX()-b->getX()) < SPRITE_WIDTH && abs(a->getY()-b->getY()) < SPRITE_HEIGHT)
         return true;
     return false;
 }
 
 Actor* StudentWorld::isBlockingObjectAt(int x, int y) {
-    return (blockingObject[x/4][y/4]);
+    return (blockingObject[x/2][y/2]);
 }
 
 void StudentWorld::levelBuild() {
@@ -157,37 +189,60 @@ void StudentWorld::levelBuild() {
                     case Level::piranha: {
                         Piranha* newPiranha = new Piranha(this, x, y);
                         m_otherCast.push_back(newPiranha);
-                        }
                         break;
+                    }
                     case Level::block: {
-                        Block* newBlock = new Block(IID_BLOCK, this, x, y);
+                        NormalBlock* newBlock = new NormalBlock(this, x, y);
                         m_otherCast.push_back(newBlock);
-                        for (int a = 0; a < 2; a++) {
-                            for (int b = 0; b < 2; b++) {
-                                blockingObject[2*i+a][2*j+b] = newBlock;
+                        for (int a = 0; a < 4; a++) {
+                            for (int b = 0; b < 4; b++) {
+                                blockingObject[4*i+a][4*j+b] = newBlock;
                             }
                         }
                         break;
-                        }
-                    case Level::star_goodie_block:
+                    }
+                    case Level::star_goodie_block: {
                         //construct star block
+                        StarBlock* newBlock = new StarBlock(this, x, y);
+                        m_otherCast.push_back(newBlock);
+                        for (int a = 0; a < 4; a++) {
+                            for (int b = 0; b < 4; b++) {
+                                blockingObject[4*i+a][4*j+b] = newBlock;
+                            }
+                        }
                         break;
-                    case Level::mushroom_goodie_block:
+                    }
+                    case Level::mushroom_goodie_block: {
                         //construct mushroom block
+                        MushroomBlock* newBlock = new MushroomBlock(this, x, y);
+                        m_otherCast.push_back(newBlock);
+                        for (int a = 0; a < 4; a++) {
+                            for (int b = 0; b < 4; b++) {
+                                blockingObject[4*i+a][4*j+b] = newBlock;
+                            }
+                        }
                         break;
-                    case Level::flower_goodie_block:
+                    }
+                    case Level::flower_goodie_block: {
                         //construct flower block
+                        FlowerBlock* newBlock = new FlowerBlock(this, x, y);
+                        m_otherCast.push_back(newBlock);
+                        for (int a = 0; a < 4; a++) {
+                            for (int b = 0; b < 4; b++) {
+                                blockingObject[4*i+a][4*j+b] = newBlock;
+                            }
+                        }
                         break;
+                    }
                     case Level::pipe:{
                         Pipe* newPipe = new Pipe(this, x, y);
                         m_otherCast.push_back(newPipe);
-                        for (int a = 0; a < 2; a++) {
-                            for (int b = 0; b < 2; b++) {
-                                blockingObject[2*i+a][2*j+b] = newPipe;
+                        for (int a = 0; a < 4; a++) {
+                            for (int b = 0; b < 4; b++) {
+                                blockingObject[4*i+a][4*j+b] = newPipe;
                             }
                         }
-                        break;
-                        }
+                    }
                         break;
                     case Level::flag: {
                         Flag* newFlag = new Flag(this, x, y);

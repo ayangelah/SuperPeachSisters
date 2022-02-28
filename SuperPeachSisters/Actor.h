@@ -24,9 +24,13 @@ public:
     }
     StudentWorld* getWorld();
     bool isAlive() {
-        return notDead;
+        if (this != nullptr)
+            return notDead;
+        return false;
     }
-    virtual int actorType() = 0;
+    void projectileMotion();
+    virtual void hitPeachAction() {}
+    virtual void hitAction() {}
 private:
     StudentWorld* m_world;
     bool notDead;
@@ -37,10 +41,11 @@ public:
     Peach(StudentWorld* sw, int x, int y);
     virtual ~Peach();
     virtual void doSomething();
-    Actor* touching();
-    virtual int actorType();
-    virtual void bonk() { }
-    void jump(int tick);
+    virtual
+    void bonk();
+    void changeHitPoints(int newHitPoints) {
+        hitPoint = newHitPoints;
+    }
     bool starPower() {
         return hasStarPower;
     }
@@ -53,6 +58,18 @@ public:
     bool invincible() {
         return isInvincible;
     }
+    void changeStarPower(bool status) {
+        hasStarPower = status;
+    }
+    void changeJumpPower(bool status) {
+        hasJumpPower = status;
+    }
+    void changeShootPower(bool status) {
+        hasShootPower = status;
+    }
+    void changeInvincible(bool status) {
+        isInvincible = status;
+    }
 private:
     bool isJumping;
     int remainingJumpDistance;
@@ -62,26 +79,123 @@ private:
     bool hasShootPower;
     bool isInvincible;
     int rechargeTime;
+    int invincibleTime;
+    int tempInvincibleTime;
 };
 
-class Block: public Actor {
+class Obstacle: public Actor {
 public:
-    Block(int imageID, StudentWorld* sw, int x, int y);
-    virtual ~Block();
-    virtual void doSomething();
-    virtual int actorType();
-    bool hasGoodie;
-    int goodieType;
-    void bonk();
+    Obstacle(int imageID, StudentWorld* sw, int x, int y);
+    virtual ~Obstacle();
+    virtual void doSomething() {}
+    virtual bool returnHasGoodie() = 0;
+    virtual void releaseGoodie(int x, int y) = 0;
+    virtual void bonk();
 private:
 };
 
-class Pipe: public Block {
+class NormalBlock: public Obstacle {
+public:
+    NormalBlock(StudentWorld* sw, int x, int y);
+    virtual ~NormalBlock();
+    virtual void doSomething();
+    bool returnHasGoodie() {
+        return hasGoodie;
+    }
+    void releaseGoodie(int x, int y);
+private:
+    bool hasGoodie;
+};
+
+class FlowerBlock: public Obstacle {
+public:
+    FlowerBlock(StudentWorld* sw, int x, int y);
+    virtual ~FlowerBlock();
+    virtual void doSomething();
+    bool returnHasGoodie() {
+        return hasGoodie;
+    }
+    void releaseGoodie(int x, int y);
+private:
+    bool hasGoodie;
+};
+
+class StarBlock: public Obstacle {
+public:
+    StarBlock(StudentWorld* sw, int x, int y);
+    virtual ~StarBlock();
+    virtual void doSomething();
+    bool returnHasGoodie() {
+        return hasGoodie;
+    }
+    void releaseGoodie(int x, int y);
+private:
+    bool hasGoodie;
+};
+
+class MushroomBlock: public Obstacle {
+public:
+    MushroomBlock(StudentWorld* sw, int x, int y);
+    virtual ~MushroomBlock();
+    virtual void doSomething();
+    bool returnHasGoodie() {
+        return hasGoodie;
+    }
+    void releaseGoodie(int x, int y);
+private:
+    bool hasGoodie;
+};
+
+class Pipe: public Obstacle {
 public:
     Pipe(StudentWorld* sw, int x, int y);
     virtual ~Pipe();
-    virtual int actorType();
+    virtual
     void bonk();
+    bool returnHasGoodie() { return false; }
+    virtual void releaseGoodie(int x, int y) {}
+};
+
+class Goodie: public Actor {
+public:
+    Goodie(int imageID, StudentWorld* sw, int x, int y);
+    virtual ~Goodie();
+    void doSomething();
+    virtual void givePower() = 0;
+    void hitAction();
+    void hitPeachAction();
+    void bonk();
+    
+};
+
+class Flower: public Goodie {
+public:
+    Flower(StudentWorld* sw, int x, int y);
+    virtual ~Flower();
+    void givePower();
+    void bonk();
+private:
+    int m_points = 50;
+};
+
+class Star: public Goodie {
+public:
+    Star(StudentWorld* sw, int x, int y);
+    virtual ~Star();
+    void givePower();
+    void bonk();
+private:
+    int m_points = 100;
+};
+
+class Mushroom: public Goodie {
+public:
+    Mushroom(StudentWorld* sw, int x, int y);
+    virtual ~Mushroom();
+    void givePower();
+    void bonk();
+private:
+    int m_points = 75;
 };
 
 class Flag: public Actor {
@@ -89,8 +203,8 @@ public:
     Flag(StudentWorld* sw, int x, int y);
     virtual ~Flag();
     virtual void doSomething();
-    int actorType();
     void bonk();
+    
 };
 
 class Mario: public Actor {
@@ -98,44 +212,49 @@ public:
     Mario(StudentWorld* sw, int x, int y);
     virtual ~Mario();
     virtual void doSomething();
-    int actorType();
+    
     void bonk();
+    
 };
 
-class Flower: public Actor {
+class Projectile: public Actor {
 public:
-    Flower(StudentWorld* sw, int x, int y);
-    virtual ~Flower();
+    Projectile(int imageID, StudentWorld* sw, int x, int y, int dir);
+    virtual ~Projectile();
     virtual void doSomething();
-    int actorType();
-    void bonk();
+    virtual void bonk() {}
+    void hitAction();
+    virtual void hitPeachAction();
 };
 
-class Star: public Actor {
+class Piranha_Fireball: public Projectile {
 public:
-    Star(StudentWorld* sw, int x, int y);
-    virtual ~Star();
-    virtual void doSomething();
-    int actorType();
-    void bonk();
-};
-
-class Piranha_Fireball: public Actor {
-public:
-    Piranha_Fireball(StudentWorld* sw, int x, int y);
+    Piranha_Fireball(StudentWorld* sw, int x, int y, int dir);
     virtual ~Piranha_Fireball();
     virtual void doSomething();
-    int actorType();
     void bonk();
+    void hitAction();
+    void hitPeachAction();
 };
 
-class Peach_Fireball: public Actor {
+class Peach_Fireball: public Projectile {
 public:
-    Peach_Fireball(StudentWorld* sw, int x, int y);
+    Peach_Fireball(StudentWorld* sw, int x, int y, int dir);
     virtual ~Peach_Fireball();
     virtual void doSomething();
-    int actorType();
+    void hitAction();
     void bonk();
+    
+};
+
+class Shell: public Projectile {
+public:
+    Shell(StudentWorld* sw, int x, int y, int dir);
+    virtual ~Shell();
+    virtual void doSomething();
+    
+    void bonk();
+    
 };
 
 class Enemy: public Actor {
@@ -143,23 +262,17 @@ public:
     Enemy(int imageID, StudentWorld* sw, int x, int y);
     virtual ~Enemy();
     void doSomething();
-    int actorType();
+    void enemyMovement();
+    bool projectileMovement();
     void bonk();
-};
-
-class Shell: public Enemy {
-public:
-    Shell(StudentWorld* sw, int x, int y);
-    virtual ~Shell();
-    void bonk();
-private:
 };
 
 class Goomba: public Enemy {
 public:
     Goomba(StudentWorld* sw, int x, int y);
     virtual ~Goomba();
-    void bonk();
+//    void doSomething();
+    
 private:
 };
 
@@ -168,14 +281,18 @@ public:
     Piranha(StudentWorld* sw, int x, int y);
     virtual ~Piranha();
     void bonk();
+    void doSomething();
+    
 private:
+    int firingDelay;
 };
 
 class Koopa: public Enemy {
 public:
     Koopa(StudentWorld* sw, int x, int y);
     virtual ~Koopa();
-    void bonk();
+//    void doSomething();
+    
 private:
 };
 

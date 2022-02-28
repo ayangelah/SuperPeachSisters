@@ -40,6 +40,10 @@ public:
     void playerWonSet() {
         playerWon = true;
     }
+    inline
+    void addToCast(Actor* a) {
+        m_otherCast.push_back(a);
+    }
     virtual int init(); //initializes levels
     virtual int move(); //plays a tick
     virtual void cleanUp(); //cleans up all objects at the end of levels.
