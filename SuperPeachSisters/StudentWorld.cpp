@@ -37,27 +37,19 @@ int StudentWorld::init()
 {
     
     levelBuild();
-    
-    for (int j=GRID_HEIGHT*2-1; j>=0; j--) {
-        for (int i=0; i<GRID_WIDTH*2; i++) {
-                cout << (this->blockingObject[i][j] != nullptr ? "#" : " ");
-        }
-        cout << endl;
-
-    }
     //GameWorld::setMsPerTick(15000);
     return GWSTATUS_CONTINUE_GAME;
 }
 
-int delay(int t)
-{
-    volatile int s=0;
-    for (int i=0; i<t; i++)
-        for (int j=0; j<t; j++)
-            s=s*i+j % 65535;
-    
-    return s;
-}
+//int delay(int t)
+//{
+//    volatile int s=0;
+//    for (int i=0; i<t; i++)
+//        for (int j=0; j<t; j++)
+//            s=s*i+j % 65535;
+//
+//    return s;
+//}
 
 int StudentWorld::move()
 {
@@ -65,7 +57,7 @@ int StudentWorld::move()
     // Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
     //--------------------------------------------------
     //Gamestuff
-    volatile int sum = delay(10000);
+//    volatile int sum = delay(10000);
     if (levelCompleted)
         return GWSTATUS_FINISHED_LEVEL;
     
@@ -84,7 +76,6 @@ int StudentWorld::move()
     if (m_peach->jumpPower())
         oss << " JumpPower!";
     string s = oss.str();
-//    string output = "Lives: " + '3' + "  Level: " + '1' + "  Points: " + playerScore;
     setGameStatText(s);
     
     //Peachstuff
@@ -100,6 +91,8 @@ int StudentWorld::move()
     if (!m_peach->isAlive()) {
         playSound(SOUND_PLAYER_DIE);
         //destroy peach
+        delete m_peach;
+        decLives();
         return GWSTATUS_PLAYER_DIED;
     }
     
@@ -130,7 +123,6 @@ int StudentWorld::move()
 
 void StudentWorld::cleanUp()
 {
-    delete m_peach;
     for (int i = 0; i < m_otherCast.size(); i++) {
         delete m_otherCast[i];
         m_otherCast[i] = nullptr;
@@ -151,7 +143,10 @@ Actor* StudentWorld::isBlockingObjectAt(int x, int y) {
 
 void StudentWorld::levelBuild() {
     Level lev(assetPath());
-    string level_file = "level01.txt";
+    ostringstream levelnumber;
+    levelnumber.fill('0');
+    levelnumber << "level" << setw(2) << getLevel() << ".txt";
+    string level_file = levelnumber.str();
     Level::LoadResult result = lev.loadLevel(level_file);
     
     if (result == Level::load_fail_file_not_found)

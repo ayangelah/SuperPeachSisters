@@ -21,26 +21,28 @@ void Actor::projectileMotion() {
     if (!isAlive())
         return;
     if (getWorld()->overlap(this, getWorld()->returnPeach())) {
-        hitPeachAction();
-        return;
+        if (hitPeachAction())
+            return;
     }
-    if (!(getWorld()->isBlockingObjectAt(getX(), getY()-2))) {
+    if (!(getWorld()->isBlockingObjectAt(getX(), getY()-2)) && !(getWorld()->isBlockingObjectAt(getX()+4, getY()-2))) {
         moveTo(getX(), getY()-2);
     }
     int targetX;
     if (getDirection() == 0) {
         targetX = getX()+2;
+        if (getWorld()->isBlockingObjectAt(targetX+6, getY()) || getWorld()->isBlockingObjectAt(targetX+6, getY() + 6)) {
+            hitAction();
+            return;
+        }
     }
     if (getDirection() == 180) {
         targetX = getX()-2;
+        if (getWorld()->isBlockingObjectAt(targetX, getY()) || getWorld()->isBlockingObjectAt(targetX, getY() + 6)) {
+            hitAction();
+            return;
+        }
     }
-    if (getWorld()->isBlockingObjectAt(targetX+6, getY())) {
-        hitAction();
-        return;
-    }
-    else {
-        moveTo(targetX, getY());
-    }
+    moveTo(targetX, getY());
 }
 
 //PEACH
@@ -64,6 +66,7 @@ void Peach::bonk() {
     else {
         hitPoint--;
         //set temporary invincibility to 10 ticks
+        tempInvincibleTime = 10;
         hasShootPower = false;
         hasJumpPower = false;
         if (hitPoint >= 1)
@@ -309,10 +312,11 @@ void Goodie::hitAction() {
         setDirection(0);
 }
 
-void Goodie::hitPeachAction() {
+bool Goodie::hitPeachAction() {
     givePower();
     getWorld()->playSound(SOUND_PLAYER_POWERUP);
     changeAliveStatus(false);
+    return true;
 }
 
 void Goodie::doSomething() {
@@ -403,10 +407,13 @@ Enemy::~Enemy() {
 }
 
 void Enemy::doSomething() {
-    enemyMovement();
+    if (!isAlive()) {
+        return;
+    }
     if (getWorld()->overlap(this, getWorld()->returnPeach())) {
         getWorld()->returnPeach()->bonk();
     }
+    enemyMovement();
 }
 
 bool Enemy::projectileMovement() {
@@ -432,18 +439,18 @@ void Enemy::enemyMovement() {
             return;
         }
         else {
-            moveTo(getX()+4, getY());
+            moveTo(getX()+1, getY());
             return;
         }
         
     }
     if (getDirection() == 180) {
-        if (getWorld()->isBlockingObjectAt(getX()-4, getY()) != nullptr || getWorld()->isBlockingObjectAt(getX()-4, getY()-4) == nullptr) {
+        if (getWorld()->isBlockingObjectAt(getX()-2, getY()) != nullptr || getWorld()->isBlockingObjectAt(getX()-2, getY()-4) == nullptr) {
             setDirection(0);
             return;
         }
         else {
-            moveTo(getX()-4, getY());
+            moveTo(getX()-1, getY());
             return;
         }
         
@@ -451,7 +458,21 @@ void Enemy::enemyMovement() {
 }
 
 void Enemy::bonk() {
-    
+    if (getWorld()->returnPeach()->starPower() || getWorld()->returnPeach()->invincible()) {
+        getWorld()->playSound(SOUND_PLAYER_KICK);
+        getWorld()->changeScore(100);
+        changeAliveStatus(false);
+    }
+    else {
+        getWorld()->returnPeach()->bonk();
+    }
+}
+
+bool Enemy::damaged() {
+    //bonked by fireball
+    getWorld()->changeScore(100);
+    changeAliveStatus(false);
+    return true;
 }
 
 //GOOMBA
@@ -478,7 +499,7 @@ void Piranha::doSomething() {
         getWorld()->returnPeach()->bonk();
         return;
     }
-    if (!(getWorld()->returnPeach()->getY() < 1.5*SPRITE_HEIGHT*getY()))
+    if (!(abs(getY()-getWorld()->returnPeach()->getY()) <= 1.5*SPRITE_HEIGHT))
         return;
     if (getWorld()->returnPeach()->getX() < getX()) //left
         setDirection(180);
@@ -504,23 +525,20 @@ void Piranha::doSomething() {
     }
 }
 
-void Piranha::bonk() {
-    if (getWorld()->returnPeach()->starPower() || getWorld()->returnPeach()->invincible()) {
-        getWorld()->playSound(SOUND_PLAYER_KICK);
-        getWorld()->changeScore(100);
-        changeAliveStatus(false);
-    }
-    else {
-        getWorld()->returnPeach()->bonk();
-    }
-}
-
 //KOOPA
 Koopa::Koopa(StudentWorld* sw, int x, int y) : Enemy(IID_KOOPA, sw, x, y){
     
 }
 Koopa::~Koopa() {
     
+}
+bool Koopa::damaged() {
+    //bonked by fireball
+    getWorld()->changeScore(100);
+    changeAliveStatus(false);
+    Shell* newShell = new Shell(getWorld(), getX(), getY(), getDirection());
+    getWorld()->addToCast(newShell);
+    return true;
 }
 
 //PROJECTILE
@@ -531,30 +549,40 @@ Projectile::~Projectile() {
     
 }
 void Projectile::doSomething() {
-    //check overlap
     
 }
 void Projectile::hitAction() {
     changeAliveStatus(false);
 }
-void Projectile::hitPeachAction() {
-    
+bool Projectile::hitPeachAction() {
+    return false;
 }
 
 //PEACH FIREBALL
 Peach_Fireball::Peach_Fireball(StudentWorld* sw, int x, int y, int dir) : Projectile(IID_PEACH_FIRE, sw, x, y, dir) {
-    
+    changeAliveStatus(true);
 }
 Peach_Fireball::~Peach_Fireball() {
     
 }
 void Peach_Fireball::doSomething() {
     projectileMotion();
+    for (int i = 0; i < getWorld()->returnCast().size(); i++) {
+        if (getWorld()->overlap(this, getWorld()->returnCast()[i]) && getWorld()->returnCast()[i]->isAlive()) {
+            getWorld()->returnCast()[i]->damaged();
+            if (getWorld()->returnCast()[i]->damaged()) {
+                changeAliveStatus(false);
+            }
+            return;
+        }
+    }
 }
 void Peach_Fireball::bonk() {
     
 }
-void Peach_Fireball::hitAction() {}
+void Peach_Fireball::hitAction() {
+    changeAliveStatus(false);
+}
 
 //PIRANHA FIREBALL
 Piranha_Fireball::Piranha_Fireball(StudentWorld* sw, int x, int y, int dir) : Projectile(IID_PIRANHA_FIRE, sw, x, y, dir) {
@@ -574,9 +602,10 @@ void Piranha_Fireball::hitAction() {
     changeAliveStatus(false);
 }
 
-void Piranha_Fireball::hitPeachAction() {
+bool Piranha_Fireball::hitPeachAction() {
     getWorld()->returnPeach()->bonk();
     changeAliveStatus(false);
+    return true;
 }
 
 //SHELL
@@ -587,7 +616,19 @@ Shell::~Shell() {
     
 }
 void Shell::doSomething() {
-    
+    projectileMotion();
+    for (int i = 0; i < getWorld()->returnCast().size(); i++) {
+        if (getWorld()->overlap(this, getWorld()->returnCast()[i]) && getWorld()->returnCast()[i]->isAlive()) {
+            if (getWorld()->returnCast()[i]->damaged()) {
+                changeAliveStatus(false);
+            }
+            return;
+        }
+    }
+}
+
+bool Shell::damaged() {
+    return false;
 }
 void Shell::bonk() {
     

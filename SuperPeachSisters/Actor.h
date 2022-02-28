@@ -29,7 +29,8 @@ public:
         return false;
     }
     void projectileMotion();
-    virtual void hitPeachAction() {}
+    virtual bool damaged() {return false;}
+    virtual bool hitPeachAction() {return false;}
     virtual void hitAction() {}
 private:
     StudentWorld* m_world;
@@ -163,9 +164,8 @@ public:
     void doSomething();
     virtual void givePower() = 0;
     void hitAction();
-    void hitPeachAction();
+    bool hitPeachAction();
     void bonk();
-    
 };
 
 class Flower: public Goodie {
@@ -202,7 +202,7 @@ class Flag: public Actor {
 public:
     Flag(StudentWorld* sw, int x, int y);
     virtual ~Flag();
-    virtual void doSomething();
+    void doSomething();
     void bonk();
     
 };
@@ -212,7 +212,6 @@ public:
     Mario(StudentWorld* sw, int x, int y);
     virtual ~Mario();
     virtual void doSomething();
-    
     void bonk();
     
 };
@@ -224,7 +223,7 @@ public:
     virtual void doSomething();
     virtual void bonk() {}
     void hitAction();
-    virtual void hitPeachAction();
+    virtual bool hitPeachAction();
 };
 
 class Piranha_Fireball: public Projectile {
@@ -234,7 +233,7 @@ public:
     virtual void doSomething();
     void bonk();
     void hitAction();
-    void hitPeachAction();
+    bool hitPeachAction();
 };
 
 class Peach_Fireball: public Projectile {
@@ -244,7 +243,6 @@ public:
     virtual void doSomething();
     void hitAction();
     void bonk();
-    
 };
 
 class Shell: public Projectile {
@@ -252,7 +250,7 @@ public:
     Shell(StudentWorld* sw, int x, int y, int dir);
     virtual ~Shell();
     virtual void doSomething();
-    
+    bool damaged();
     void bonk();
     
 };
@@ -264,7 +262,8 @@ public:
     void doSomething();
     void enemyMovement();
     bool projectileMovement();
-    void bonk();
+    virtual bool damaged();
+    virtual void bonk();
 };
 
 class Goomba: public Enemy {
@@ -280,7 +279,6 @@ class Piranha: public Enemy {
 public:
     Piranha(StudentWorld* sw, int x, int y);
     virtual ~Piranha();
-    void bonk();
     void doSomething();
     
 private:
@@ -292,6 +290,7 @@ public:
     Koopa(StudentWorld* sw, int x, int y);
     virtual ~Koopa();
 //    void doSomething();
+    bool damaged();
     
 private:
 };
